@@ -25,7 +25,7 @@ export function FileRow(props: { file: typeof files_table.$inferSelect }) {
 
                 return newProgress
             })
-        }, 400)
+        }, 300)
         try {
             await deleteFile(fileId)
             clearInterval(interval)
@@ -81,7 +81,7 @@ export function FolderRow(props: { folder: typeof folders_table.$inferSelect }) 
 
                 return newProgress
             })
-        }, 400)
+        }, 300)
         try {
             await deleteFolder(folderId)
             clearInterval(interval)

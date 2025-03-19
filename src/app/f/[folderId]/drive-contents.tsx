@@ -25,12 +25,28 @@ export default function DriveContents(props: {
 
     const handleUploadFile = () => {
         navigate.refresh();
-        toast("File uploaded!", {
+        toast.success("File uploaded!", {
             description: "Your file has been successfully uploaded",
             action: {
               label: "OK",
               onClick: () => console.log("OK"),
             },
+            classNames:{
+                success:"bg-gray-800"
+            }
+          })
+    }
+
+    const handleUploadFilerError = () => {
+        toast.error("Error during uploading file", {
+            description: "Error occured while uploading file, try later",
+            action: {
+              label: "OK",
+              onClick: () => console.log("OK"),
+            },
+            classNames:{
+                success:"bg-gray-800"
+            }
           })
     }
 
@@ -90,11 +106,11 @@ export default function DriveContents(props: {
                     className="mt-5"
                     endpoint="fileUploader"
                     onClientUploadComplete={() => handleUploadFile()}
-                    onUploadError={(propss) => console.log(propss.data)}
+                    onUploadError={(propss) => handleUploadFilerError()}
                     input={{folderId:props.currentFolderId}}>
                 </UploadButton>
             </div>
-            <Toaster />
+            <Toaster toastOptions={{style:{ background: '#1f2937'}}}/>
         </div>
     )
 }
