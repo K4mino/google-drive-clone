@@ -1,17 +1,24 @@
 import type { File, Folder } from "../../../lib/mock-data"
-import { Folder as FolderIcon, FileIcon, Upload, ChevronRight, Trash2Icon } from "lucide-react"
+import { Folder as FolderIcon, FileIcon, Upload, ChevronRight, Trash2Icon, Edit2Icon } from "lucide-react"
 import Link from "next/link"
-import { useState } from "react"
+import { Dispatch, SetStateAction, useState } from "react"
 import { Button } from "~/components/ui/button"
+import { EditModal } from "~/components/ui/editModal"
 import { Progress } from "~/components/ui/progress"
-import { deleteFile, deleteFolder } from "~/server/actions"
+import { deleteFile, deleteFolder, updateFileName, updateFolderName } from "~/server/actions"
 import type { files_table, folders_table } from "~/server/db/schema"
 
+interface FileRowProps {
+  currentUser:string;
+  currentFolderId: number;
+  file: typeof files_table.$inferSelect,
+}
 
-export function FileRow(props: { file: typeof files_table.$inferSelect }) {
+export function FileRow(props: FileRowProps) {
 
     const [deleteProgress, setDeleteProgress] = useState(0)
-    const { file } = props
+
+    const { file, currentFolderId, currentUser } = props
 
     const handleDeleteFile = async (fileId: number) => {
         const interval = setInterval(() => {
@@ -49,8 +56,18 @@ export function FileRow(props: { file: typeof files_table.$inferSelect }) {
                         </a>
                     </div>
                     <div className="col-span-2 text-gray-400">{"File"}</div>
-                    <div className="col-span-3 text-gray-400">{file.size}</div>
-                    <div className="col-span-1 text-gray-400">
+                    <div className="col-span-2 text-gray-400">{file.size}</div>
+                    <div className="col-span-2 text-gray-400">
+                        <EditModal
+                            size={file.size}
+                            currentFileId={file.id}
+                            onConfirm={updateFileName}
+                            currentUser={props.currentUser} currentFolderId={props.currentFolderId}
+                            trigger={
+                            <Button variant={"ghost"} >
+                                <Edit2Icon size={20}></Edit2Icon>
+                            </Button>
+                            }/>
                         <Button variant={"ghost"} onClick={() => handleDeleteFile(file.id)} aria-label="Delete file">
                             <Trash2Icon size={20}></Trash2Icon>
                         </Button>
@@ -64,10 +81,16 @@ export function FileRow(props: { file: typeof files_table.$inferSelect }) {
     )
 }
 
-export function FolderRow(props: { folder: typeof folders_table.$inferSelect }) {
+interface FolderRowProps {
+    currentUser:string;
+    currentFolderId: number;
+    folder: typeof folders_table.$inferSelect,
+  }
+
+export function FolderRow(props: FolderRowProps) {
 
     const [deleteProgress, setDeleteProgress] = useState(0)
-    const { folder } = props
+    const { folder, currentFolderId, currentUser } = props
 
     const handleDeleteFolder = async (folderId: number) => {
         const interval = setInterval(() => {
@@ -108,8 +131,17 @@ export function FolderRow(props: { folder: typeof folders_table.$inferSelect }) 
                         </Link>
                     </div>
                     <div className="col-span-2 text-gray-400">{"Folder"}</div>
-                    <div className="col-span-3 text-gray-400"></div>
-                    <div className="col-span-1 text-gray-400">
+                    <div className="col-span-2 text-gray-400"></div>
+                    <div className="col-span-2 text-gray-400">
+                        <EditModal
+                            currentFileId={folder.id}
+                            onConfirm={updateFolderName}
+                            currentUser={props.currentUser} currentFolderId={props.currentFolderId}
+                            trigger={
+                            <Button variant={"ghost"} >
+                                <Edit2Icon size={20}></Edit2Icon>
+                            </Button>
+                            }/>
                         <Button variant={"ghost"} onClick={() => handleDeleteFolder(folder.id)} aria-label="Delete file">
                             <Trash2Icon size={20}></Trash2Icon>
                         </Button>

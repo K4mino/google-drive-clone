@@ -10,7 +10,7 @@ import { files_table, folders_table } from "~/server/db/schema"
 import { SignedOut, SignInButton, SignUpButton, SignedIn, UserButton } from "@clerk/nextjs"
 import { UploadButton } from "~/components/uploadthing"
 import { useRouter } from "next/navigation"
-import { CreateFolderModal } from "~/components/ui/create-folder-modal"
+import { CreateFolderModal } from "~/components/ui/createfolderModal"
 import { toast } from "sonner"
 import { Toaster } from "~/components/ui/sonner"
 
@@ -74,7 +74,10 @@ export default function DriveContents(props: {
                         ))}
                     </div>
                     <div className="flex justify-between items-center gap-4">
-                        <CreateFolderModal currentUser={props.currentUser} currentFolderId={props.currentFolderId}/>
+                        <CreateFolderModal  
+                            currentUser={props.currentUser} 
+                            currentFolderId={props.currentFolderId}
+                        />
                         <SignedOut>
                             <SignInButton />
                             <SignUpButton />
@@ -89,16 +92,16 @@ export default function DriveContents(props: {
                         <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-400">
                             <div className="col-span-6">Name</div>
                             <div className="col-span-2">Type</div>
-                            <div className="col-span-3">Size</div>
-                            <div className="col-span-1">Action</div>
+                            <div className="col-span-2">Size</div>
+                            <div className="col-span-2">Action</div>
                         </div>
                     </div>
                     <ul>
                         {props.folders.map((folder) => (
-                            <FolderRow key={folder.id} folder={folder} />
+                            <FolderRow currentUser={props.currentUser} currentFolderId={props.currentFolderId} key={folder.id} folder={folder} />
                         ))}
                         {props.files.map((file) => (
-                            <FileRow key={file.id} file={file} />
+                            <FileRow currentUser={props.currentUser} currentFolderId={props.currentFolderId} key={file.id} file={file} />
                         ))}
                     </ul>
                 </div>

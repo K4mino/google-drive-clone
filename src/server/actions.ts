@@ -5,6 +5,7 @@ import { files_table, folders_table } from "./db/schema";
 import { UTApi } from "uploadthing/server";
 import { auth } from "@clerk/nextjs/server";
 import { cookies } from "next/headers";
+import { getFileById } from "./db/queries";
 
 const utApi = new UTApi()
 
@@ -35,18 +36,44 @@ export async function deleteFile(fileId: number) {
     return { success: true }
 }
 
-export async function createFolder(input:{
-    folder: {
-        name: string;
-        parent:number;
-    },
-    userId: string
-}){
-    await db.insert(folders_table).values({
-        ...input.folder,
-        ownerId: input.userId
-    })
+export async function updateFileName(params: {itemId:number, newName:string}){
 
+    const {itemId,newName} = params
+
+    const file = await getFileById(itemId)
+
+    await db.update(files_table).set({name: newName}).where(eq(files_table.id,itemId))
+
+    const key = file?.url.replace("https://utfs.io/f/", "") as string
+    
+    utApi.renameFiles({
+        fileKey:  key,
+        newName
+    })
+}
+
+export async function createFolder(
+  input: {
+    folder: { name: string; parent: number };
+    userId: string;
+  }): Promise<void>{
+    const { folder, userId } = input;
+
+    await db.insert(folders_table).values({
+        ...folder,
+        ownerId: userId
+    })
+}
+
+export async function updateFolderName(params: {itemId:number, newName:string}){
+
+    const { itemId, newName } = params
+
+    await db
+        .update(folders_table)
+        .set({name:newName})
+        .where(eq(folders_table.id,itemId));
+        
 }
 
 

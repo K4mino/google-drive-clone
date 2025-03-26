@@ -20,14 +20,18 @@ import { Input } from "./input"
 import { Label } from "./label"
 import { createFolder } from "~/server/actions"
 
-interface CreateFolderModalProps {
+interface ModalProps {
+  trigger?: React.ReactNode;
   currentUser:string;
   currentFolderId: number;
-  trigger?: React.ReactNode
-}
+  onConfirm: (params:{itemId:number, newName:string}) => Promise<void>,
+  currentFileId:number;
+  size?:number;
+} 
 
-export function CreateFolderModal({ currentUser, currentFolderId, trigger }: CreateFolderModalProps) {
-  const [folderName, setFolderName] = useState("")
+
+export function EditModal({ trigger, currentUser, currentFolderId, currentFileId, onConfirm, size }: ModalProps) {
+  const [editName, setEditName] = useState("")
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
@@ -38,12 +42,12 @@ export function CreateFolderModal({ currentUser, currentFolderId, trigger }: Cre
     setError("")
 
     // Validate folder name
-    if (!folderName.trim()) {
+    if (!editName.trim()) {
       setError("Folder name cannot be empty")
       return
     }
 
-    if (/[<>:"/\\|?*]/.test(folderName)) {
+    if (/[<>:"/\\|?*]/.test(editName)) {
       setError("Folder name contains invalid characters")
       return
     }
@@ -53,15 +57,12 @@ export function CreateFolderModal({ currentUser, currentFolderId, trigger }: Cre
 
       // Here you would typically call your API to create the folder
       // For example:
-      await createFolder({
-        folder:{
-            name:folderName,
-            parent:currentFolderId
-        },
-        userId: currentUser
+      await onConfirm({
+        itemId:currentFileId,
+        newName:editName
       })
       // Reset form and close modal
-      setFolderName("")
+      setEditName("")
       setIsOpen(false)
 
       // Refresh the page to show the new folder
@@ -80,24 +81,24 @@ export function CreateFolderModal({ currentUser, currentFolderId, trigger }: Cre
         {trigger || (
           <Button variant="outline" size="sm" className="gap-2">
             <Folder className="h-4 w-4" />
-            New Folder
+            {"Submit"}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create new folder</DialogTitle>
-          <DialogDescription>Enter a name for your new folder.</DialogDescription>
+          <DialogTitle>Update {size ? "file" : "folder"} name</DialogTitle>
+          <DialogDescription>Enter a new name for your {size ? "file" : "folder"}.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="folderName">Folder name</Label>
+              <Label htmlFor="editName">{size ? "File" : "Folder"} name</Label>
               <Input
-                id="folderName"
-                value={folderName}
-                onChange={(e) => setFolderName(e.target.value)}
-                placeholder="Untitled folder"
+                id="editName"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Untitled name"
                 autoFocus
                 className={error ? "border-red-500" : ""}
               />
@@ -109,7 +110,7 @@ export function CreateFolderModal({ currentUser, currentFolderId, trigger }: Cre
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Creating..." : "Create"}
+              {isLoading ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>
         </form>
